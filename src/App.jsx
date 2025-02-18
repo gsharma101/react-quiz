@@ -3,6 +3,7 @@ import Mainsection from "./Mainsection";
 import Header from "./Header";
 import Loader from "./Loader";
 import Error from "./Error";
+import Question from "./Question";
 import StartScreen from "./StartScreen";
 
 const initialState = {
@@ -24,13 +25,15 @@ function reducer(state, action) {
         ...state,
         status: "error",
       };
+    case "start":
+      return { ...state, status: "active" };
     default:
       throw new Error("Action unknown");
   }
 }
 
 const App = () => {
-  const [{questions, status}, dispatch] = useReducer(reducer, initialState);
+  const [{ questions, status }, dispatch] = useReducer(reducer, initialState);
   // const {question, status} = state;
 
   const numQuestions = questions.length;
@@ -54,7 +57,7 @@ const App = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
         // Optionally, you can dispatch an error action to handle it in your state management
-        dispatch({ type: "dataFailed"});
+        dispatch({ type: "dataFailed" });
       }
     }
 
@@ -65,9 +68,10 @@ const App = () => {
       <Header />
 
       <Mainsection>
-        {status === "loading" && <Loader/>}
-        {status === "error" && <Error/>}
-        {status === "ready" && <StartScreen numQuestions={numQuestions}/> }
+        {status === "loading" && <Loader />}
+        {status === "error" && <Error />}
+        {status === "ready" && <StartScreen numQuestions={numQuestions} dispatch={dispatch} />}
+        {status === "active" && <Question />}
       </Mainsection>
     </div>
   );
