@@ -1,6 +1,9 @@
+import { useEffect, useReducer } from "react";
 import Mainsection from "./Mainsection";
 import Header from "./Header";
-import { useEffect, useReducer } from "react";
+import Loader from "./Loader";
+import Error from "./Error";
+import StartScreen from "./StartScreen";
 
 const initialState = {
   questions: [],
@@ -14,12 +17,12 @@ function reducer(state, action) {
       return {
         ...state,
         questions: action.payload,
-        state: "ready",
+        status: "ready",
       };
     case "dataFailed":
       return {
         ...state,
-        state: "error",
+        status: "error",
       };
     default:
       throw new Error("Action unknown");
@@ -27,7 +30,10 @@ function reducer(state, action) {
 }
 
 const App = () => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [{questions, status}, dispatch] = useReducer(reducer, initialState);
+  // const {question, status} = state;
+
+  const numQuestions = questions.length;
 
   useEffect(function () {
     /*
@@ -48,18 +54,20 @@ const App = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
         // Optionally, you can dispatch an error action to handle it in your state management
-        dispatch({ type: "dataError"});
+        dispatch({ type: "dataFailed"});
       }
     }
 
     getData();
   }, []);
   return (
-    <div>
+    <div className="app">
       <Header />
-      <Mainsection className="main">
-        <p>1/15</p>
-        <p>Question?</p>
+
+      <Mainsection>
+        {status === "loading" && <Loader/>}
+        {status === "error" && <Error/>}
+        {status === "ready" && <StartScreen numQuestions={numQuestions}/> }
       </Mainsection>
     </div>
   );
